@@ -1,6 +1,7 @@
 # Asciimg
 
 Turn images into ascii-art with the raw power of :punch: **web assembly** :punch:
+
 ---
 
 ## Running it
