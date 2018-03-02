@@ -1,0 +1,23 @@
+{
+  "name": "ascii",
+  "version": "1.0.0",
+  "description": "Turn images into ascii-art with the raw power of :punch: **web assembly** :punch:",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "parcel build html/index.html"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AndyLnd/asciimg.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AndyLnd/asciimg/issues"
+  },
+  "homepage": "https://github.com/AndyLnd/asciimg#readme",
+  "devDependencies": {
+    "parcel-bundler": "^1.6.2"
+  }
+}
