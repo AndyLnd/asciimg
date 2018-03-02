@@ -10,7 +10,7 @@ You will need to have rust and parceljs installed
     ./start.sh
 
 ## TODO
--[ ] sanitize folder structure
--[ ] throw some css at it
--[ ] add brightness slider
--[ ] use webpack4
+- [ ] sanitize folder structure
+- [ ] throw some css at it
+- [ ] add brightness slider
+- [ ] use webpack4
