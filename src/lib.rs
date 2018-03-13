@@ -87,3 +87,84 @@ fn calc_contrast (val: i32, contrast: f32, threshold: f32) -> i32 {
   }
   val
 }
+
+fn bit_diff(ar1: &[u16], ar2: &[u16]) -> u32{
+  ar1.iter().zip(ar2).fold(0u32, |acc, (&v1, &v2)| acc + (v1 ^ v2).count_ones())
+}
+
+fn closest_bit_char (m: &[u16], chars: &[u16], char_count: usize, ch: usize) -> usize {
+  let mut min_diff = u32::max_value();
+  let mut min_char = 0usize;
+  for pointer in 0..char_count{
+    let offset = pointer * ch;
+    let diff = bit_diff(m, &chars[offset..(offset + ch)]);
+    if diff < min_diff {
+      min_diff = diff;
+      min_char = pointer;
+    }
+  }
+  min_char
+}
+
+#[wasm_bindgen]
+#[no_mangle]
+pub extern fn make_ascii_2(img: &[u8], iw: usize, ih: usize, cimg: &[u8], cw: usize, ch: usize, char_list: &str, char_count: usize) -> String {
+
+  let img_map = get_floyd_steinberg(img, iw, ih, cw, ch);
+  let char_map = get_floyd_steinberg(cimg, cw * char_count, ch, cw, ch);
+  let line_length = iw / cw;
+  let mut out_s = String::with_capacity(line_length * ih / ch);
+  for i in 0..img_map.len() / ch {
+    if i > 0 && i % line_length == 0 {
+      out_s.push('\n');
+    }
+    let offset = i * ch;
+    let img_slice = &img_map[offset..offset+ch];
+    let closest_char = closest_bit_char(img_slice, &char_map, char_count, ch);
+    out_s.push(char_list.chars().nth(closest_char).unwrap());
+  }
+  out_s
+}
+
+
+fn get_floyd_steinberg(img: &[u8], iw: usize, ih: usize, cw: usize, ch: usize) -> Vec<u16>{
+  let w = (iw / cw) * cw;
+  let h = (ih / ch) * ch;
+
+  let blocks_per_line = w / cw;
+  let mut floyd_steinberg_map = vec![0u16; blocks_per_line * h];
+  let mut grey_map = vec![0f32; w * h];
+  for i in 0..w * h {
+    let pos = ((i%w) + (i/w) * iw) * 4;
+    grey_map[i] = (img[pos] as f32 * 0.2126 + img[pos+1] as f32 * 0.7152 + img[pos+2] as f32 * 0.0722) / 255.0;
+  }
+
+  for i in 0..w * h {
+    let x = i % w;
+    let y = i / w;
+    let mut new_val = 1u16;
+    if grey_map[i] < 0.5 {
+      new_val = 0u16;
+    }
+    let block_num = x / cw + (y / ch) * blocks_per_line;
+    let offset = block_num * ch + y % ch;
+    floyd_steinberg_map[offset] |= new_val << (x % cw);
+    let error = grey_map[i] - new_val as f32;
+
+    if x < w - 1 {
+      grey_map[i + 1] += error * (7.0 / 16.0);
+    }
+
+    if y < h - 1 {
+      grey_map[i + w] += error * (5.0 / 16.0);
+      if x > 0 {
+        grey_map[i + w - 1] += error * (3.0 / 16.0);
+      }
+      if x < w - 1 {
+        grey_map[i + w + 1] += error * (1.0 / 16.0);
+      }
+    }
+  }
+
+  floyd_steinberg_map
+}

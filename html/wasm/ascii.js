@@ -87,6 +87,29 @@ wasm.__wbindgen_free(ptr6, len6);
 
                 }
             }
+export function make_ascii_2(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7) {
+        const [ptr0, len0] = passArray8ToWasm(arg0);
+                    const [ptr3, len3] = passArray8ToWasm(arg3);
+                    const [ptr6, len6] = passStringToWasm(arg6);
+                    try {
+                    const ret = wasm.make_ascii_2(ptr0, len0, arg1, arg2, ptr3, len3, arg4, arg5, ptr6, len6, arg7);
+                    
+                    const ptr = wasm.__wbindgen_boxed_str_ptr(ret);
+                    const len = wasm.__wbindgen_boxed_str_len(ret);
+                    const realRet = getStringFromWasm(ptr, len);
+                    wasm.__wbindgen_boxed_str_free(ret);
+                    return realRet;
+                
+                } finally {
+                    
+wasm.__wbindgen_free(ptr0, len0);
+
+wasm.__wbindgen_free(ptr3, len3);
+
+wasm.__wbindgen_free(ptr6, len6);
+
+                }
+            }
 export const __wbindgen_throw = 
                     function(ptr, len) {
                         throw new Error(getStringFromWasm(ptr, len));

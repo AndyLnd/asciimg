@@ -13,6 +13,7 @@ const grey = (r, g, b) => r * 0.21 + g * 0.72 + b * 0.07;
 let charWidth;
 let charHeight;
 let charList = [];
+let charString = '';
 
 function getGrayMatrix(iData) {
   const d = iData.data;
@@ -59,13 +60,41 @@ function makeCharTable(fontSize = '8px', fontFamily = 'monospace') {
   }
   return charTable;
 }
+
+function makeCharImage(fontSize = '8px', fontFamily = 'monospace') {
+  const span = document.createElement('span');
+  span.style.fontFamily = fontFamily;
+  span.style.fontSize = fontSize;
+  span.textContent = '.';
+  document.body.appendChild(span);
+  charWidth = span.offsetWidth;
+  charHeight = span.offsetHeight;
+  document.body.removeChild(span);
+  charString = '';
+  for (let i = 32; i < 256; i++) {
+    if (i > 126 && i < 161) continue;
+    charString += String.fromCharCode(i);
+  }
+  const can = document.createElement('canvas');
+  can.width = charString.length * charWidth;
+  can.height = charHeight;
+  const ctx = can.getContext('2d');
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, can.width, can.height);
+  ctx.fillStyle = '#000';
+  ctx.font = `${fontSize} ${fontFamily}`;
+  ctx.fillText(charString, 0, charHeight);
+  return ctx.getImageData(0, 0, can.width, can.height).data;
+}
+
 const charTable = makeCharTable();
+const charImageData = makeCharImage();
 const charLength = charWidth * charHeight;
 const charCount = charList.length;
 const i32CharTable = new Int32Array(charLength * charCount);
 charList.forEach((char, i) => i32CharTable.set(charTable[char], i * charLength));
 
-function makeAscii(ctx, cw, ch) {
+function makeAscii(ctx) {
   const iw = ctx.canvas.width;
   const ih = ctx.canvas.height;
 
@@ -73,7 +102,32 @@ function makeAscii(ctx, cw, ch) {
   const threshold = 255 - parseInt(document.querySelector('#threshold').value);
 
   console.time('make_ascii');
-  const ascii = make_ascii(ctx.getImageData(0, 0, iw, ih).data, iw, ih, i32CharTable, cw, ch, charList.join(''), charList.length, contrast, threshold);
+  const ascii = make_ascii(
+    ctx.getImageData(0, 0, iw, ih).data,
+    iw,
+    ih,
+    i32CharTable,
+    charWidth,
+    charHeight,
+    charList.join(''),
+    charList.length,
+    contrast,
+    threshold
+  );
+  //console.log(ctx.getImageData(0, 0, iw, ih).data, iw, ih, charImageData, cw, ch, charString, charString.length);
+  //console.log(make_ascii_2());
+  /*
+  const ascii = make_ascii_2(
+    ctx.getImageData(0, 0, iw, ih).data,
+    iw,
+    ih,
+    charImageData,
+    cw,
+    ch,
+    charString,
+    charString.length
+  );
+  */
   console.timeEnd('make_ascii');
 
   const output = document.querySelector('#output');
@@ -83,6 +137,8 @@ function makeAscii(ctx, cw, ch) {
 }
 const fileInput = document.querySelector('#file');
 fileInput.addEventListener('change', loadImage);
+
+document.querySelector('#webcam').addEventListener('click', startWebcam);
 
 document.querySelector('#contrast').addEventListener('change', loadImage);
 document.querySelector('#threshold').addEventListener('change', loadImage);
@@ -95,7 +151,6 @@ function loadImage() {
   }
   const img = new Image();
   img.onload = () => {
-
     const can = document.createElement('canvas');
     const ctx = can.getContext('2d');
     const w = img.width; // - img.width % charWidth;
@@ -105,7 +160,7 @@ function loadImage() {
     ctx.fillStyle = '#fff';
     ctx.fillRect(0, 0, w, h);
     ctx.drawImage(img, 0, 0, w, h);
-   // normalizeImage(ctx);
+    // normalizeImage(ctx);
 
     makeAscii(ctx, charWidth, charHeight);
   };
@@ -157,4 +212,28 @@ function normalizeImage(ctx) {
     }
   }
   ctx.putImageData(iData, 0, 0);
+}
+
+function startWebcam() {
+  const constraints = { audio: false, video: { width: 640, height: 360 } };
+  const video = document.createElement('video');
+  const can = document.createElement('canvas');
+  can.width = 640;
+  can.height = 360;
+  const ctx = can.getContext('2d');
+  navigator.mediaDevices
+    .getUserMedia(constraints)
+    .then(stream => {
+      video.srcObject = stream;
+      video.onloadedmetadata = () => {
+        video.play();
+        function processFrame (){
+          ctx.drawImage(video,0,0);
+          makeAscii(ctx);
+          setTimeout(processFrame, 0);
+        }
+        processFrame();
+      };
+    })
+    .catch(err => console.log(err.name + ': ' + err.message));
 }
