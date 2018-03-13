@@ -132,13 +132,13 @@ function makeAscii(ctx) {
 
   const output = document.querySelector('#output');
   output.value = ascii;
-  output.style.width = `${ctx.canvas.width}px`;
-  output.style.height = `${ctx.canvas.height}px`;
+  output.cols = ~~(iw / charWidth);
+  output.rows = ~~(ih / charHeight);
 }
 const fileInput = document.querySelector('#file');
 fileInput.addEventListener('change', loadImage);
 
-document.querySelector('#webcam').addEventListener('click', ()=>startWebcam());
+document.querySelector('#webcam').addEventListener('click', () => startWebcam());
 
 document.querySelector('#contrast').addEventListener('change', loadImage);
 document.querySelector('#threshold').addEventListener('change', loadImage);
@@ -167,11 +167,12 @@ function loadImage() {
   img.src = window.URL.createObjectURL(file);
 }
 
-function copyImage(){
+function copyImage() {
   const output = document.querySelector('#output');
   output.select();
   document.execCommand('copy');
   output.setSelectionRange(0, 0);
+  output.blur();
 }
 
 function adjustAlpha(c, a, d, s) {
@@ -234,8 +235,8 @@ function startWebcam(width = 512, height = 288) {
       video.srcObject = stream;
       video.onloadedmetadata = () => {
         video.play();
-        function processFrame (){
-          ctx.drawImage(video,0,0);
+        function processFrame() {
+          ctx.drawImage(video, 0, 0);
           makeAscii(ctx);
           setTimeout(processFrame, 0);
         }
