@@ -138,11 +138,11 @@ function makeAscii(ctx) {
 const fileInput = document.querySelector('#file');
 fileInput.addEventListener('change', loadImage);
 
-document.querySelector('#webcam').addEventListener('click', startWebcam);
+document.querySelector('#webcam').addEventListener('click', ()=>startWebcam());
 
 document.querySelector('#contrast').addEventListener('change', loadImage);
 document.querySelector('#threshold').addEventListener('change', loadImage);
-document.querySelector('#make-ascii').addEventListener('click', loadImage);
+document.querySelector('#copy').addEventListener('click', copyImage);
 
 function loadImage() {
   const file = fileInput.files[0];
@@ -165,6 +165,13 @@ function loadImage() {
     makeAscii(ctx, charWidth, charHeight);
   };
   img.src = window.URL.createObjectURL(file);
+}
+
+function copyImage(){
+  const output = document.querySelector('#output');
+  output.select();
+  document.execCommand('copy');
+  output.setSelectionRange(0, 0);
 }
 
 function adjustAlpha(c, a, d, s) {
@@ -214,12 +221,12 @@ function normalizeImage(ctx) {
   ctx.putImageData(iData, 0, 0);
 }
 
-function startWebcam() {
-  const constraints = { audio: false, video: { width: 640, height: 360 } };
+function startWebcam(width = 512, height = 288) {
+  const constraints = { audio: false, video: { width, height } };
   const video = document.createElement('video');
   const can = document.createElement('canvas');
-  can.width = 640;
-  can.height = 360;
+  can.width = width;
+  can.height = height;
   const ctx = can.getContext('2d');
   navigator.mediaDevices
     .getUserMedia(constraints)
