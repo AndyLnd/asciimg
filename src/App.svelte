@@ -5,21 +5,30 @@
   import Slider from './Slider.svelte';
   import GhLink from './GhLink.svelte';
 
+  enum STATE {
+    IMAGE,
+    CAM,
+    BLOBS,
+  }
+
+  let state = STATE.IMAGE;
   let ascii = writable('');
   let contrast = writable(25);
   let threshold = writable(128);
   let files: FileList;
-  let useCam = false;
-  let useBlobs = false;
 
-  $: files && fileToAscii(files[0], $contrast, $threshold).then((res) => ascii.set(res));
-  $: if (useCam) {
+  const toggleState = (newState: STATE) => (state = state === newState ? STATE.IMAGE : newState);
+
+  $: state === STATE.IMAGE && files && fileToAscii(files[0], $contrast, $threshold).then((res) => ascii.set(res));
+
+  $: if (state === STATE.CAM) {
     startCam(ascii, contrast, threshold);
   } else {
     stopCam();
     ascii.set('');
   }
-  $: if (useBlobs) {
+
+  $: if (state === STATE.BLOBS) {
     startBlobs(ascii);
   } else {
     stopBlobs();
@@ -33,30 +42,17 @@
     <label
       class="button"
       on:change={() => {
-        useCam = false;
-        useBlobs = false;
+        state = STATE.IMAGE;
       }}
     >
-      {'From file'}
+      From file
       <input type="file" accept="image/*" bind:files />
     </label>
-    <div
-      class="button"
-      on:click={() => {
-        useCam = !useCam;
-        useBlobs = false;
-      }}
-    >
-      {useCam ? 'Stop webcam' : 'Start webcam'}
+    <div class="button" on:click={() => toggleState(STATE.CAM)}>
+      {state === STATE.CAM ? 'Stop webcam' : 'Start webcam'}
     </div>
-    <div
-      class="button"
-      on:click={() => {
-        useCam = false;
-        useBlobs = !useBlobs;
-      }}
-    >
-      {useBlobs ? 'Stop blobs' : 'Start blobs'}
+    <div class="button" on:click={() => toggleState(STATE.BLOBS)}>
+      {state === STATE.BLOBS ? 'Stop blobs' : 'Start blobs'}
     </div>
   </div>
   <Slider name="Contrast" min={-100} max={100} bind:value={$contrast} />

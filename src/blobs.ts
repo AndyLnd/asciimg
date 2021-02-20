@@ -40,8 +40,8 @@ const randomCircle = (maxX: number, maxY: number, minR: number, maxR: number): C
   x: rnd(maxX),
   y: rnd(maxY),
   r: rnd(maxR - minR) + minR,
-  vx: rnd(0.6) - 0.3,
-  vy: rnd(0.6) - 0.3,
+  vx: rnd(0.4) - 0.2,
+  vy: rnd(0.4) - 0.2,
 });
 
 const updateCircles = (circles: Circle[], W: number, H: number): Circle[] =>
