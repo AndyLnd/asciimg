@@ -1,5 +1,6 @@
 <script lang="ts">
   import {writable} from 'svelte/store';
+  import {init} from './wasm';
   import {startCam, stopCam, fileToAscii} from './asciiimg';
   import {startBlobs, stopBlobs} from './blobs';
   import Slider from './Slider.svelte';
@@ -15,11 +16,19 @@
   let ascii = writable('');
   let contrast = writable(25);
   let threshold = writable(128);
+  let charWidth = writable(0);
+  let charHeight = writable(0);
+  let offsetX = 0;
+  let offsetY = 0;
   let files: FileList;
+
+  init(charWidth, charHeight);
 
   const toggleState = (newState: STATE) => (state = state === newState ? STATE.IMAGE : newState);
 
-  $: state === STATE.IMAGE && files && fileToAscii(files[0], $contrast, $threshold).then((res) => ascii.set(res));
+  $: state === STATE.IMAGE &&
+    files &&
+    fileToAscii(files[0], $contrast, $threshold, offsetX, offsetY).then((res) => ascii.set(res));
 
   $: if (state === STATE.CAM) {
     startCam(ascii, contrast, threshold);
@@ -55,9 +64,19 @@
       {state === STATE.BLOBS ? 'Stop blobs' : 'Start blobs'}
     </div>
   </div>
-  <Slider name="Contrast" min={-100} max={100} bind:value={$contrast} />
-  <Slider name="Threshold" min={0} max={255} bind:value={$threshold} />
-  <pre>{$ascii}</pre>
+  <div>
+    <Slider disabled={state === STATE.BLOBS} name="Contrast" min={-100} max={100} bind:value={$contrast} />
+    <Slider disabled={state !== STATE.IMAGE} name="Left" min={0} max={$charWidth} bind:value={offsetX} />
+  </div>
+  <div>
+    <Slider disabled={state === STATE.BLOBS} name="Threshold" min={0} max={255} bind:value={$threshold} />
+    <Slider disabled={state !== STATE.IMAGE} name="Top" min={0} max={$charHeight} bind:value={offsetY} />
+  </div>
+  <div class="output">
+    {#if $ascii}
+      <pre>{$ascii}</pre>
+    {/if}
+  </div>
   <footer>
     made with <GhLink repo="rust-lang/rust">rust</GhLink>, <GhLink repo="rustwasm/wasm-bindgen">wasm-bindgen</GhLink> & <GhLink
       repo="sveltejs/svelte">svelte</GhLink
@@ -67,10 +86,17 @@
 
 <style>
   pre {
-    font-size: 8px;
+    font-size: 10px;
     font-family: monospace;
-    grid-column: 1/-1;
     justify-self: center;
+    box-shadow: 0 0 5px black;
+    display: inline-block;
+    padding: 16px;
+    border-radius: 16px;
+  }
+  .output {
+    grid-column: 1/-1;
+    text-align: center;
   }
 
   section {

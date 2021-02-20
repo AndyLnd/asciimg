@@ -1,5 +1,6 @@
 // @ts-ignore
 import wasm from './rust/Cargo.toml';
+import {Writable} from 'svelte/store';
 
 let charWidth: number;
 let charHeight: number;
@@ -9,12 +10,17 @@ let chars = ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^`a
 let ascii: any;
 let charData: Uint32Array;
 
-(async () =>  {
+export async function init($charWidth: Writable<number>, $charHeight: Writable<number>) {
   ascii = await wasm();
-  makeCharTable();
-})()
+  makeCharTable($charWidth, $charHeight);
+}
 
-function makeCharTable(fontSize = '8px', fontFamily = 'monospace') {
+function makeCharTable(
+  $charWidth: Writable<number>,
+  $charHeight: Writable<number>,
+  fontSize = '8px',
+  fontFamily = 'monospace'
+) {
   const span = document.createElement('span');
   span.style.fontFamily = fontFamily;
   span.style.fontSize = fontSize;
@@ -22,6 +28,8 @@ function makeCharTable(fontSize = '8px', fontFamily = 'monospace') {
   document.body.appendChild(span);
   charWidth = span.offsetWidth;
   charHeight = span.offsetHeight;
+  $charWidth.set(charWidth);
+  $charHeight.set(charHeight);
   document.body.removeChild(span);
   const can = document.createElement('canvas');
   can.width = charWidth * chars.length;
@@ -57,5 +65,3 @@ function i32ToAscii(vals: Uint32Array): string {
     .map((num) => (num === -1 ? '\n' : chars[num]))
     .join('');
 }
-
-

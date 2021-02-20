@@ -45,20 +45,29 @@ export function stopCam() {
   cancelAnimationFrame(camReqId);
 }
 
-export async function fileToAscii(file: File, contrast: number, threshold: number): Promise<string> {
+export async function fileToAscii(
+  file: File,
+  contrast: number,
+  threshold: number,
+  offsetX: number,
+  offsetY: number
+): Promise<string> {
   if (!/^image/i.test(file.type)) {
     return '';
   }
   const img = await loadImage(window.URL.createObjectURL(file));
   const can = document.createElement('canvas');
   const ctx = can.getContext('2d')!;
-  const w = img.width; // - img.width % charWidth;
-  const h = img.height + 3; // - img.height % charHeight;
+  const scaleW = img.width > 1000 ? 1000 / img.width : 1;
+  const scaleH = img.height > 1000 ? 1000 / img.height : 1;
+  const scale = Math.min(scaleW, scaleH);
+  const w = img.width * scale; // - img.width % charWidth;
+  const h = img.height * scale; // - img.height % charHeight;
   can.width = w;
   can.height = h;
   ctx.fillStyle = '#fff';
   ctx.fillRect(0, 0, w, h);
-  ctx.drawImage(img, 0, 3, w, h);
+  ctx.drawImage(img, offsetX, offsetY, w, h);
   return ctxToAscii(ctx, contrast, threshold);
 }
 
