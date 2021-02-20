@@ -20,12 +20,12 @@
 </script>
 
 <section>
-  <h4>ascii image</h4>
+  <h4>Ascii Cam</h4>
   <label class="button" on:change={() => (useCam = false)}>
     {'From file'}
     <input type="file" accept="image/*" bind:files />
   </label>
-  <div class="button" on:click={() => (useCam = !useCam)}>{useCam ? 'Stop webcam' : 'Use webcam'}</div>
+  <div class="button" on:click={() => (useCam = !useCam)}>{useCam ? 'Stop webcam' : 'Start webcam'}</div>
   <Slider name="Contrast" min={-100} max={100} bind:value={$contrast} />
   <Slider name="Threshold" min={0} max={255} bind:value={$threshold} />
   <pre>{$ascii}</pre>

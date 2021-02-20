@@ -41,7 +41,7 @@ export async function startCam(
 }
 
 export function stopCam() {
-  stream.getTracks().forEach((track) => track.stop());
+  stream?.getTracks().forEach((track) => track.stop());
   cancelAnimationFrame(camReqId);
 }
 
