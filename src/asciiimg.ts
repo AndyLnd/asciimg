@@ -2,6 +2,7 @@ import {ctxToAscii} from './wasm';
 import type {Writable} from 'svelte/store';
 
 let camReqId: number;
+let stream: MediaStream;
 
 export async function startCam(
   $ascii: Writable<string>,
@@ -26,7 +27,7 @@ export async function startCam(
   const ctx = can.getContext('2d')!;
   ctx.translate(width, 0);
   ctx.scale(-1, 1);
-  const stream = await navigator.mediaDevices.getUserMedia(constraints);
+  stream = await navigator.mediaDevices.getUserMedia(constraints);
   video.srcObject = stream;
   video.onloadedmetadata = () => {
     video.play();
@@ -40,6 +41,7 @@ export async function startCam(
 }
 
 export function stopCam() {
+  stream.getTracks().forEach((track) => track.stop());
   cancelAnimationFrame(camReqId);
 }
 
