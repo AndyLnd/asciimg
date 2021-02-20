@@ -11,6 +11,10 @@
 </div>
 
 <style>
+  div {
+    max-width: 120px;
+    align-self: center;
+  }
   input {
     width: 100%;
   }

@@ -20,12 +20,14 @@
 </script>
 
 <section>
-  <h4>Ascii Cam</h4>
-  <label class="button" on:change={() => (useCam = false)}>
-    {'From file'}
-    <input type="file" accept="image/*" bind:files />
-  </label>
-  <div class="button" on:click={() => (useCam = !useCam)}>{useCam ? 'Stop webcam' : 'Start webcam'}</div>
+  <h2>Ascii Cam</h2>
+  <div class="buttons">
+    <label class="button" on:change={() => (useCam = false)}>
+      {'From file'}
+      <input type="file" accept="image/*" bind:files />
+    </label>
+    <div class="button" on:click={() => (useCam = !useCam)}>{useCam ? 'Stop webcam' : 'Start webcam'}</div>
+  </div>
   <Slider name="Contrast" min={-100} max={100} bind:value={$contrast} />
   <Slider name="Threshold" min={0} max={255} bind:value={$threshold} />
   <pre>{$ascii}</pre>
@@ -46,12 +48,12 @@
 
   section {
     display: grid;
-    grid: auto auto 1fr auto / 1fr 1fr 1fr 1fr;
+    grid: auto auto 1fr auto / 1fr auto auto auto 1fr;
     gap: 16px;
     height: 100%;
   }
-  h4 {
-    grid-column: span 4;
+  h2{
+    grid-column: 1/-1;
     text-align: center;
   }
   label > input {
@@ -64,11 +66,19 @@
     margin: 0;
     text-align: center;
     padding: 8px;
+    margin: 4px;
     background-color: #eee;
     cursor: pointer;
+    max-width: 120px;
+    width: 120px;
   }
   .button:hover {
     background-color: #fff;
+  }
+
+  .buttons {
+    grid-column: 2/3;
+ 
   }
   footer {
     justify-self: center;
