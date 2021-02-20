@@ -3,5 +3,5 @@
 Cargo.lock
 .DS_Store
 /.cache
-/public
+/public/build
 /node_modules
