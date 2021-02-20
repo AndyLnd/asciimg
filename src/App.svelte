@@ -1,6 +1,7 @@
 <script lang="ts">
   import {writable} from 'svelte/store';
   import {startCam, stopCam, fileToAscii} from './asciiimg';
+  import {startBlobs, stopBlobs} from './blobs';
   import Slider from './Slider.svelte';
   import GhLink from './GhLink.svelte';
 
@@ -9,6 +10,7 @@
   let threshold = writable(128);
   let files: FileList;
   let useCam = false;
+  let useBlobs = false;
 
   $: files && fileToAscii(files[0], $contrast, $threshold).then((res) => ascii.set(res));
   $: if (useCam) {
@@ -17,16 +19,45 @@
     stopCam();
     ascii.set('');
   }
+  $: if (useBlobs) {
+    startBlobs(ascii);
+  } else {
+    stopBlobs();
+    ascii.set('');
+  }
 </script>
 
 <section>
   <h2>Ascii Cam</h2>
   <div class="buttons">
-    <label class="button" on:change={() => (useCam = false)}>
+    <label
+      class="button"
+      on:change={() => {
+        useCam = false;
+        useBlobs = false;
+      }}
+    >
       {'From file'}
       <input type="file" accept="image/*" bind:files />
     </label>
-    <div class="button" on:click={() => (useCam = !useCam)}>{useCam ? 'Stop webcam' : 'Start webcam'}</div>
+    <div
+      class="button"
+      on:click={() => {
+        useCam = !useCam;
+        useBlobs = false;
+      }}
+    >
+      {useCam ? 'Stop webcam' : 'Start webcam'}
+    </div>
+    <div
+      class="button"
+      on:click={() => {
+        useCam = false;
+        useBlobs = !useBlobs;
+      }}
+    >
+      {useBlobs ? 'Stop blobs' : 'Start blobs'}
+    </div>
   </div>
   <Slider name="Contrast" min={-100} max={100} bind:value={$contrast} />
   <Slider name="Threshold" min={0} max={255} bind:value={$threshold} />
@@ -52,7 +83,7 @@
     gap: 16px;
     height: 100%;
   }
-  h2{
+  h2 {
     grid-column: 1/-1;
     text-align: center;
   }
@@ -78,7 +109,6 @@
 
   .buttons {
     grid-column: 2/3;
- 
   }
   footer {
     justify-self: center;
