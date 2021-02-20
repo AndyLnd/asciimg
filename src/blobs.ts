@@ -110,7 +110,7 @@ export const startBlobs = ($ascii: Writable<string>, width = 300, height = 300) 
     ctx.lineWidth = 2;
     drawLines(lines1, ctx);
     $ascii.set(ctxToAscii(ctx));
-    requestAnimationFrame(() => loop(updateCircles(circles, W, H)));
+    blobReqId = requestAnimationFrame(() => loop(updateCircles(circles, W, H)));
   };
 
   const circles = Array.from({length: 10}, () => randomCircle(W, H, 1, 7));
